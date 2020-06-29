@@ -4,6 +4,7 @@
 package rxjava;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.observables.ConnectableObservable;
 
 import java.util.concurrent.TimeUnit;
@@ -15,15 +16,17 @@ public class App {
         ConnectableObservable<Long> observable = Observable.interval(1, TimeUnit.SECONDS).publish();
 
         // Connect first observer
-        observable.subscribe(item -> System.out.println("Ob 1: " + item));
+        Disposable d1 = observable.subscribe(item -> System.out.println("Ob 1: " + item));
         observable.connect();
         pause(2000);
 
         // Second observer joins in mid way through, rather than restarting the count
-        observable.subscribe(item -> System.out.println("Ob 2: " + item));
+        Disposable d2 = observable.subscribe(item -> System.out.println("Ob 2: " + item));
         observable.connect();
         pause(2000);
 
+        d1.dispose();
+        d2.dispose();
     }
 
     private static void pause(int duration) {
