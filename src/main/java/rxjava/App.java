@@ -4,38 +4,33 @@
 package rxjava;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.observables.ConnectableObservable;
+
+import java.util.concurrent.TimeUnit;
 
 public class App {
 
     public static void main(String[] args) {
-        Observable<Integer> observable = Observable.just(1,2,3,4,5);
+        // Connectable observable based on seconds intervals.
+        ConnectableObservable<Long> observable = Observable.interval(1, TimeUnit.SECONDS).publish();
 
-        Observer<Integer> observer = new Observer<Integer>() {
+        // Connect first observer
+        observable.subscribe(item -> System.out.println("Ob 1: " + item));
+        observable.connect();
+        pause(2000);
 
-            @Override
-            public void onSubscribe(@NonNull Disposable d) {
-                System.out.println("Started observing");
-            }
+        // Second observer joins in mid way through, rather than restarting the count
+        observable.subscribe(item -> System.out.println("Ob 2: " + item));
+        observable.connect();
+        pause(2000);
 
-            @Override
-            public void onNext(@NonNull Integer integer) {
-                System.out.println(integer);
-            }
+    }
 
-            @Override
-            public void onError(@NonNull Throwable e) {
-                System.out.println("Error: " + e.getLocalizedMessage());
-            }
-
-            @Override
-            public void onComplete() {
-                System.out.println("Completed observing");
-            }
-        };
-
-        observable.subscribe(observer);
+    private static void pause(int duration) {
+        try {
+            Thread.sleep(duration);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
