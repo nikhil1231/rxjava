@@ -5,28 +5,22 @@ package rxjava;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.observables.ConnectableObservable;
-
-import java.util.concurrent.TimeUnit;
 
 public class App {
 
     public static void main(String[] args) {
-        // Connectable observable based on seconds intervals.
-        ConnectableObservable<Long> observable = Observable.interval(1, TimeUnit.SECONDS).publish();
+
+        PriceOracle oracle = new PriceOracle();
+
+        Observable<Double> prices = oracle.getPrices().getObservable();
 
         // Connect first observer
-        Disposable d1 = observable.subscribe(item -> System.out.println("Ob 1: " + item));
-        observable.connect();
-        pause(2000);
+        Disposable d1 = prices.subscribe(item -> System.out.println("Ob 1: " + item));
 
-        // Second observer joins in mid way through, rather than restarting the count
-        Disposable d2 = observable.subscribe(item -> System.out.println("Ob 2: " + item));
-        observable.connect();
         pause(2000);
 
         d1.dispose();
-        d2.dispose();
+        oracle.kill();
     }
 
     private static void pause(int duration) {
