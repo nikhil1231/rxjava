@@ -6,18 +6,21 @@ package rxjava;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
+import java.util.concurrent.TimeUnit;
+
 public class App {
 
     public static void main(String[] args) {
 
         PriceOracle oracle = new PriceOracle();
 
-        Observable<Double> prices = oracle.getPrices().getObservable();
+        // Fetch the latest price every second
+        Observable<Double> prices = oracle.getPrices().getObservable().sample(1000, TimeUnit.MILLISECONDS);
 
         // Connect first observer
-        Disposable d1 = prices.subscribe(item -> System.out.println("Ob 1: " + item));
+        Disposable d1 = prices.subscribe(System.out::println);
 
-        pause(2000);
+        pause(5000);
 
         d1.dispose();
         oracle.kill();
